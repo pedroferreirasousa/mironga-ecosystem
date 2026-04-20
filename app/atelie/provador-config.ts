@@ -1,5 +1,6 @@
 /**
- * Provador Inteligente — opções configuráveis pelo admin.
+ * Provador Inteligente — opções de roupas de matriz africana.
+ * Candes (Candomblé, Umbanda, Quimbanda, Jurema Sagrada, Macumba Carioca).
  * Por ora são estáticas; quando o Supabase estiver integrado,
  * estas virão da tabela `atelie_options`.
  */
@@ -12,33 +13,39 @@ import type {
 } from "./types";
 
 export const CLOTHING_TYPES: ClothingTypeOption[] = [
-  { id: "saia",      label: "Saia",         icon: "skirt" },
-  { id: "camisa",    label: "Camisa",        icon: "shirt" },
-  { id: "conjunto",  label: "Conjunto",      icon: "set" },
-  { id: "calca",     label: "Calça",         icon: "pants" },
-  { id: "vestido",   label: "Vestido",       icon: "dress" },
-  { id: "blusa",     label: "Blusa",         icon: "blouse" },
-  { id: "shorts",    label: "Shorts",        icon: "shorts" },
-  { id: "macacao",   label: "Macacão",       icon: "overall" },
+  { id: "saia-rodada",  label: "Saia Rodada",       icon: "skirt" },
+  { id: "bata-afro",    label: "Bata / Blusa Afro",  icon: "blouse" },
+  { id: "vestido-axe",  label: "Vestido de Axé",     icon: "dress" },
+  { id: "conjunto",     label: "Conjunto",            icon: "set" },
+  { id: "calca",        label: "Calça",               icon: "pants" },
+  { id: "manto-capa",   label: "Manto / Capa",        icon: "overall" },
+  { id: "turbante-oja", label: "Turbante / Ojá",      icon: "shirt" },
+  { id: "macacao",      label: "Macacão",             icon: "overall" },
 ];
 
 export const FABRICS: FabricOption[] = [
-  { id: "algodao",   label: "Algodão" },
-  { id: "linho",     label: "Linho" },
-  { id: "renda",     label: "Renda" },
-  { id: "malha",     label: "Malha" },
-  { id: "cetim",     label: "Cetim" },
-  { id: "viscose",   label: "Viscose" },
-  { id: "croche",    label: "Crochê" },
+  { id: "algodao",  label: "Algodão" },
+  { id: "linho",    label: "Linho" },
+  { id: "renda",    label: "Renda" },
+  { id: "organza",  label: "Organza" },
+  { id: "veludo",   label: "Veludo" },
+  { id: "cetim",    label: "Cetim" },
+  { id: "voile",    label: "Voil" },
+  { id: "croche",   label: "Crochê" },
 ];
 
+// Estilos por entidade / orixá / tradição
 export const STYLES: StyleOption[] = [
-  { id: "afro",      label: "Afro" },
-  { id: "etnico",    label: "Étnico" },
-  { id: "casual",    label: "Casual" },
-  { id: "festivo",   label: "Festivo" },
-  { id: "ceremonial",label: "Cerimonial" },
-  { id: "boho",      label: "Boho" },
+  { id: "iemanja",    label: "Iemanjá"          },  // azul e branco, fluido
+  { id: "oxum",       label: "Oxum"              },  // dourado e amarelo
+  { id: "iansa",      label: "Iansã / Oyá"       },  // vermelho e marrom
+  { id: "ogum",       label: "Ogum"              },  // azul escuro e verde
+  { id: "xango",      label: "Xangô"             },  // vermelho e branco
+  { id: "oxossi",     label: "Oxóssi"            },  // verde e azul
+  { id: "oxala",      label: "Oxalá"             },  // branco puro
+  { id: "pomba-gira", label: "Pombagira"         },  // vermelho e preto
+  { id: "preto-velho",label: "Preto Velho"       },  // branco e azul
+  { id: "caboclo",    label: "Caboclo / Jurema"  },  // verde e amarelo
 ];
 
 export const COLOR_SWATCHES: ColorSwatch[] = [
