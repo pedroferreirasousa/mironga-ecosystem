@@ -4,18 +4,17 @@ import type { ChangeEvent } from "react";
 import gsap from "gsap";
 import type { ProvadorSelection } from "../../types";
 import {
-  ENTITIES,
+  CLOTHING_STYLES,
   FABRICS,
   COLOR_SWATCHES,
   ATELIE_WHATSAPP,
 } from "../../provador-config";
 
-const TOTAL_STEPS = 5;
-const STEP_LABELS = ["Entidade", "Estilo", "Cores", "Tecido & Detalhes", "Sua Foto"];
+const TOTAL_STEPS = 4;
+const STEP_LABELS = ["Modelo", "Cores", "Tecido", "Sua Foto"];
 
 function emptySelection(): ProvadorSelection {
   return {
-    entityId: "",
     styleId: "",
     primaryColor: "",
     secondaryColor: "",
@@ -35,8 +34,7 @@ export default function Provador() {
   const [resultImage, setResultImage] = useState("");
   const [error, setError] = useState("");
 
-  const selectedEntity = ENTITIES.find((e) => e.id === sel.entityId);
-  const selectedStyle  = selectedEntity?.styles.find((s) => s.id === sel.styleId);
+  const selectedStyle = CLOTHING_STYLES.find((s) => s.id === sel.styleId);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -59,11 +57,10 @@ export default function Provador() {
   }
 
   function canAdvance() {
-    if (step === 1) return !!sel.entityId;
-    if (step === 2) return !!sel.styleId;
-    if (step === 3) return !!sel.primaryColor;
-    if (step === 4) return !!sel.fabricId;
-    if (step === 5) return !!sel.photoFile;
+    if (step === 1) return !!sel.styleId;
+    if (step === 2) return !!sel.primaryColor;
+    if (step === 3) return !!sel.fabricId;
+    if (step === 4) return !!sel.photoFile;
     return true;
   }
 
@@ -86,23 +83,21 @@ export default function Provador() {
     const accent    = COLOR_SWATCHES.find((c) => c.id === sel.accentColor)?.label ?? "";
 
     const fd = new FormData();
-    fd.append("photo", sel.photoFile);
-    fd.append("entityId",       sel.entityId);
-    fd.append("entityLabel",    selectedEntity?.label ?? "");
-    fd.append("styleLabel",     selectedStyle?.label  ?? "");
-    fd.append("styleKeywords",  selectedStyle?.promptKeywords ?? "");
-    fd.append("fabric",         fabric);
-    fd.append("primaryColor",   primary);
-    fd.append("secondaryColor", secondary);
-    fd.append("accentColor",    accent);
-    fd.append("description",    sel.description);
+    fd.append("photo",         sel.photoFile);
+    fd.append("styleLabel",    selectedStyle?.label ?? "");
+    fd.append("styleKeywords", selectedStyle?.promptKeywords ?? "");
+    fd.append("fabric",        fabric);
+    fd.append("primaryColor",  primary);
+    fd.append("secondaryColor",secondary);
+    fd.append("accentColor",   accent);
+    fd.append("description",   sel.description);
 
     try {
       const res  = await fetch("/api/provador/generate", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro desconhecido.");
       setResultImage(data.image);
-      animateStep(6);
+      animateStep(5);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Falha ao gerar imagem.");
     } finally {
@@ -115,9 +110,9 @@ export default function Provador() {
     const primary = COLOR_SWATCHES.find((c) => c.id === sel.primaryColor)?.label;
     const msg = encodeURIComponent(
       `Olá! Gerei uma visualização de roupa pelo Provador Inteligente do Ateliê Luz das Almas.\n\n` +
-      `*Entidade:* ${selectedEntity?.label}\n*Estilo:* ${selectedStyle?.label}\n` +
+      `*Modelo:* ${selectedStyle?.label}\n` +
       `*Tecido:* ${fabric}\n*Cor principal:* ${primary}\n` +
-      (sel.description ? `*Detalhes extras:* ${sel.description}\n\n` : "\n") +
+      (sel.description ? `*Detalhes:* ${sel.description}\n\n` : "\n") +
       `Gostei do resultado e gostaria de negociar a confecção! 💛`
     );
     window.open(`https://wa.me/${ATELIE_WHATSAPP}?text=${msg}`, "_blank", "noopener");
@@ -137,7 +132,7 @@ export default function Provador() {
       <div className="section-header animate-in">
         <h2 className="section-title">Provador inteligente</h2>
         <p className="section-sub">
-          Escolha a entidade, o estilo e as cores — a IA veste a roupa em você. Sem trocar seu rosto.
+          Escolha o modelo de roupa, as cores e o tecido — a IA veste em você. Funciona para qualquer entidade.
         </p>
       </div>
 
@@ -165,36 +160,19 @@ export default function Provador() {
 
         <div className="provador-step-body">
 
-          {/* ── STEP 1: Entidade ── */}
+          {/* ── STEP 1: Modelo de roupa ── */}
           {step === 1 && (
             <div className="wizard-section">
-              <h3 className="wizard-section-title">Para qual entidade é a roupa?</h3>
-              <div className="entity-grid">
-                {ENTITIES.map((entity) => (
-                  <button
-                    key={entity.id}
-                    className={`entity-card entity-card--${entity.id}${sel.entityId === entity.id ? " selected" : ""}`}
-                    onClick={() => setSel((s) => ({ ...s, entityId: entity.id, styleId: "" }))}
-                  >
-                    <span className="entity-card__name">{entity.label}</span>
-                    <span className="entity-card__desc">{entity.description}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── STEP 2: Estilo ── */}
-          {step === 2 && selectedEntity && (
-            <div className="wizard-section">
-              <h3 className="wizard-section-title">Qual estilo de {selectedEntity.label}?</h3>
+              <h3 className="wizard-section-title">Qual modelo de roupa?</h3>
+              <p className="wizard-hint">Escolha o estilo de roupa. Você define a entidade pelas cores e detalhes nos próximos passos.</p>
               <div className="style-grid">
-                {selectedEntity.styles.map((style) => (
+                {CLOTHING_STYLES.map((style) => (
                   <button
                     key={style.id}
                     className={`style-card${sel.styleId === style.id ? " selected" : ""}`}
                     onClick={() => setSel((s) => ({ ...s, styleId: style.id }))}
                   >
+                    <span className="style-card__gender">{style.gender === "feminino" ? "♀" : style.gender === "masculino" ? "♂" : "⚤"}</span>
                     <span className="style-card__name">{style.label}</span>
                     <span className="style-card__desc">{style.description}</span>
                   </button>
@@ -203,8 +181,8 @@ export default function Provador() {
             </div>
           )}
 
-          {/* ── STEP 3: Cores ── */}
-          {step === 3 && (
+          {/* ── STEP 2: Cores ── */}
+          {step === 2 && (
             <div className="wizard-section">
               <h3 className="wizard-section-title">Escolha as cores</h3>
               {selectedStyle && (
@@ -212,7 +190,8 @@ export default function Provador() {
                   Sugestão para <strong>{selectedStyle.label}</strong>:{" "}
                   {selectedStyle.suggestedColors
                     .map((id) => COLOR_SWATCHES.find((c) => c.id === id)?.label)
-                    .join(" e ")}
+                    .filter(Boolean)
+                    .join(", ")}
                 </p>
               )}
 
@@ -245,7 +224,7 @@ export default function Provador() {
               </div>
 
               <div className="color-group">
-                <label className="color-group-label">Detalhes / bordado <span className="optional">(opcional)</span></label>
+                <label className="color-group-label">Bordado / detalhes <span className="optional">(opcional)</span></label>
                 <div className="color-swatches">
                   {COLOR_SWATCHES.map((c) => (
                     <button
@@ -260,8 +239,8 @@ export default function Provador() {
             </div>
           )}
 
-          {/* ── STEP 4: Tecido + descrição ── */}
-          {step === 4 && (
+          {/* ── STEP 3: Tecido + detalhes ── */}
+          {step === 3 && (
             <div className="wizard-section">
               <h3 className="wizard-section-title">Tecido e detalhes extras</h3>
 
@@ -282,11 +261,11 @@ export default function Provador() {
 
               <div className="option-group">
                 <label className="color-group-label">Algo extra <span className="optional">(opcional)</span></label>
-                <p className="wizard-hint">Ex: "saia com cauda longa", "bordado de rosas na barra", "manga sino"...</p>
+                <p className="wizard-hint">Ex: "para Exu Tranca-Rua", "saia com cauda longa", "bordado de rosas na barra", "entidade específica"...</p>
                 <textarea
                   className="filter-input provador-textarea"
                   rows={4}
-                  placeholder="Descreva um detalhe especial que deseja na peça..."
+                  placeholder="Descreva detalhes especiais ou indique a entidade..."
                   value={sel.description}
                   onChange={(e) => setSel((s) => ({ ...s, description: e.target.value }))}
                 />
@@ -294,12 +273,12 @@ export default function Provador() {
             </div>
           )}
 
-          {/* ── STEP 5: Foto ── */}
-          {step === 5 && (
+          {/* ── STEP 4: Foto ── */}
+          {step === 4 && (
             <div className="wizard-section">
               <h3 className="wizard-section-title">Envie sua foto</h3>
               <p className="wizard-hint">
-                Use uma foto em pé, corpo inteiro visível, fundo claro e boa iluminação. Quanto melhor a foto, melhor o resultado da IA.
+                Use uma foto em pé, corpo inteiro visível, fundo claro e boa iluminação. Quanto melhor a foto, melhor o resultado.
               </p>
               <label className="photo-upload-label">
                 <input
@@ -347,8 +326,8 @@ export default function Provador() {
             </div>
           )}
 
-          {/* ── STEP 6: Resultado ── */}
-          {step === 6 && resultImage && (
+          {/* ── STEP 5: Resultado ── */}
+          {step === 5 && resultImage && (
             <div className="wizard-section">
               <h3 className="wizard-section-title">Sua roupa está pronta! ✨</h3>
               <p className="wizard-hint">
@@ -360,7 +339,7 @@ export default function Provador() {
                   <img src={sel.photoPreviewUrl} alt="Foto original" className="result-image" />
                 </div>
                 <div className="result-col">
-                  <span className="result-label">{selectedEntity?.label} — {selectedStyle?.label}</span>
+                  <span className="result-label">{selectedStyle?.label}</span>
                   <img src={resultImage} alt="Visualização gerada por IA" className="result-image" />
                 </div>
               </div>

@@ -4,12 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
 /**
- * Builds a highly specific prompt for sacred Afro-Brazilian fashion.
- * Entity-specific language ensures Pombagira = ballgown, Exu = formal suit/cape.
+ * Builds a prompt for sacred Afro-Brazilian fashion.
+ * The clothing description leads the prompt (FLUX weights the start most heavily).
+ * Works for any entity — Pombagira, Exu, Caboclo, Marinheiro, Boiadeiro, etc.
  */
 function buildPrompt(body: {
-  entityId: string;
-  entityLabel: string;
   styleLabel: string;
   styleKeywords: string;
   fabric: string;
@@ -18,40 +17,25 @@ function buildPrompt(body: {
   accentColor: string;
   description: string;
 }) {
-  const isPombagira = body.entityId === "pombagira";
+  const colorDesc = [
+    body.primaryColor,
+    body.secondaryColor ? `and ${body.secondaryColor}` : "",
+    body.accentColor ? `with ${body.accentColor} embroidery and trim details` : "",
+  ].filter(Boolean).join(" ");
 
-  const base = [
-    "same person, same face, same hairstyle, same skin tone, same background",
-    "ONLY replace the clothing with:",
-  ];
+  const userNote = body.description ? `, ${body.description}` : "";
 
-  const clothingDesc = isPombagira
-    ? [
-        `sacred Pombagira ${body.styleLabel} ritual gown`,
-        body.styleKeywords,
-        `made of ${body.fabric}`,
-        `primary color ${body.primaryColor}`,
-        body.secondaryColor ? `secondary color ${body.secondaryColor}` : "",
-        body.accentColor ? `${body.accentColor} embroidery beadwork and trim details` : "",
-        body.description || "",
-        "voluminous theatrical ball gown, multiple ruffled layers, artisanal handcrafted",
-        "sacred Umbanda Candomblé Brazilian spiritual ritual fashion",
-        "full body shot, high quality dramatic fashion photograph, studio lighting",
-      ]
-    : [
-        `powerful Exu ${body.styleLabel} sacred ritual outfit`,
-        body.styleKeywords,
-        `made of ${body.fabric}`,
-        `primary color ${body.primaryColor}`,
-        body.secondaryColor ? `with ${body.secondaryColor} accent details` : "",
-        body.accentColor ? `${body.accentColor} trim and embroidery` : "",
-        body.description || "",
-        "formal sacred attire, artisanal handcrafted",
-        "sacred Umbanda Quimbanda Brazilian spiritual ritual fashion",
-        "full body shot, high quality dramatic fashion photograph, studio lighting",
-      ];
-
-  return [...base, ...clothingDesc].filter(Boolean).join(", ");
+  return [
+    // Clothing leads — FLUX weights the beginning of the prompt most
+    `fashion photograph of a person wearing a complete ${colorDesc} ${body.fabric} ${body.styleLabel} sacred ritual outfit`,
+    body.styleKeywords,
+    `complete full-body outfit covering from shoulders all the way down to feet${userNote}`,
+    "artisanal handcrafted sacred garment, full body visible from head to toe",
+    "sacred Afro-Brazilian ritual fashion, Umbanda Candomblé Quimbanda tradition",
+    "full body portrait fashion photo, dramatic studio lighting, high resolution",
+    // Identity anchor at the end
+    "same face, same hairstyle, same skin tone as input photo",
+  ].filter(Boolean).join(", ");
 }
 
 export async function POST(req: NextRequest) {
@@ -70,8 +54,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Foto não enviada." }, { status: 400 });
     }
 
-    const entityId      = (formData.get("entityId")      as string) || "pombagira";
-    const entityLabel   = (formData.get("entityLabel")   as string) || "Pombagira";
     const styleLabel    = (formData.get("styleLabel")    as string) || "";
     const styleKeywords = (formData.get("styleKeywords") as string) || "";
     const fabric        = (formData.get("fabric")        as string) || "cetim";
@@ -81,7 +63,7 @@ export async function POST(req: NextRequest) {
     const description   = (formData.get("description")   as string) || "";
 
     const prompt = buildPrompt({
-      entityId, entityLabel, styleLabel, styleKeywords,
+      styleLabel, styleKeywords,
       fabric, primaryColor, secondaryColor, accentColor, description,
     });
 
@@ -90,17 +72,20 @@ export async function POST(req: NextRequest) {
     const photoBase64  = Buffer.from(photoBuffer).toString("base64");
     const photoDataUri = `data:${photoFile.type || "image/jpeg"};base64,${photoBase64}`;
 
-    // FLUX.1-dev img2img
-    // strength 0.75 — enough to fully replace clothing while preserving face/body
+    // FLUX.1-dev img2img via Replicate
+    // prompt_strength 0.92 = almost completely replaces clothing while keeping composition
+    // guidance 7 = strong adherence to prompt for full outfit coverage
     const output = await replicate.run(
       "black-forest-labs/flux-dev",
       {
         input: {
           prompt,
-          image: photoDataUri,
-          strength: 0.75,
-          num_inference_steps: 35,
-          guidance: 4,
+          image:            photoDataUri,
+          prompt_strength:  0.92,
+          num_inference_steps: 50,
+          guidance:         7,
+          output_format:    "webp",
+          output_quality:   95,
         },
       }
     );

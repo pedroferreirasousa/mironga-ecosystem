@@ -1,197 +1,123 @@
-/**
+﻿/**
  * Provador Inteligente — Ateliê Luz das Almas
- * Estilos para Pombagira e Exu (Umbanda, Candomblé, Quimbanda, Jurema Sagrada).
- * Quando o Supabase estiver integrado, estes dados virão de `atelie_entities`.
+ * Modelos de roupa base para roupas de matriz africana e sagradas.
+ * Funciona para qualquer entidade: Pombagira, Exu, Caboclo, Marinheiro,
+ * Boiadeiro, Preto-Velho, Cigana, Baiana, etc.
  */
 
-import type { Entity, FabricOption, ColorSwatch } from "./types";
+import type { ClothingStyle, FabricOption, ColorSwatch } from "./types";
 
-export const ENTITIES: Entity[] = [
+export const CLOTHING_STYLES: ClothingStyle[] = [
+  // ── Feminino ──────────────────────────────────────────────────────
   {
-    id: "pombagira",
-    label: "Pombagira",
-    description:
-      "Rainha das encruzilhadas. Vestes dramáticas, rodadas e sensuais — saias volumosas, renda, cetim e rosas.",
-    styles: [
-      {
-        id: "maria-padilha",
-        label: "Maria Padilha",
-        description:
-          "A mais elegante — vestido rodado vermelho com renda preta, corpete estruturado, rosas e decote.",
-        promptKeywords:
-          "spectacular red satin ballgown with black lace overlay, structured off-shoulder corset bodice, voluminous multi-tiered ruffled ball skirt, black lace trim on hem, red rose embellishments at waist, long dramatic train, Umbanda Candomblé sacred ritual gown",
-        suggestedColors: ["vermelho", "preto"],
-        clothingGender: "feminino",
-      },
-      {
-        id: "sete-saias",
-        label: "Sete Saias",
-        description:
-          "Sete camadas sobrepostas de saias coloridas, cada uma de uma cor diferente.",
-        promptKeywords:
-          "seven distinct layered ball skirts in different colors cascading from waist to floor, each layer a different vibrant color, short fitted sleeveless bodice, voluminous cascading rainbow layers, theatrical sacred fashion",
-        suggestedColors: ["vermelho", "amarelo"],
-        clothingGender: "feminino",
-      },
-      {
-        id: "cigana",
-        label: "Cigana",
-        description:
-          "Estilo cigano — saias coloridas de babados, cinto de moedas douradas, ombros à mostra.",
-        promptKeywords:
-          "gypsy Romani style, colorful tiered ruffled maxi skirt, off-shoulder peasant blouse with lace trim, coin belt at waist, flowing bohemian sacred garment, bright contrasting colors, wide sleeves with ruffles",
-        suggestedColors: ["vermelho", "laranja"],
-        clothingGender: "feminino",
-      },
-      {
-        id: "rainha",
-        label: "Rainha",
-        description:
-          "Pombagira Rainha — veludo suntuoso, renda dourada, vestido de baile real com coroa.",
-        promptKeywords:
-          "royal queen ball gown, deep red and black velvet, gold lace overlay and trim, dramatic puffed sleeves with lace cuffs, extremely full volume ball skirt, tiara crown, royal sacred Umbanda ritual garment, elaborate gold embroidery",
-        suggestedColors: ["vermelho", "dourado"],
-        clothingGender: "feminino",
-      },
-      {
-        id: "das-almas",
-        label: "Das Almas",
-        description:
-          "Ligada ao cemitério — branco e vermelho, flores negras, estilo gótico sagrado.",
-        promptKeywords:
-          "sacred gothic style, white and deep red contrast ball gown, black floral skull embroidery, cemetery spiritual aesthetic, black lace mourning veil details, dramatic dark romantic silhouette, roses and bones motifs",
-        suggestedColors: ["branco", "vermelho"],
-        clothingGender: "feminino",
-      },
-      {
-        id: "meia-noite",
-        label: "Meia-Noite",
-        description:
-          "Roxo e preto com estrelas e lua — misteriosa, noturna e luxuosa.",
-        promptKeywords:
-          "midnight goddess ballgown, deep purple-black, silver celestial stars and crescent moon embroidery throughout skirt, silver sequins and crystal beadwork, mysterious and luxurious, dramatic voluminous silhouette, sacred Umbanda night spirit fashion",
-        suggestedColors: ["roxo", "preto"],
-        clothingGender: "feminino",
-      },
-      {
-        id: "menina",
-        label: "Menina",
-        description:
-          "Jovem e alegre — rosa e vermelho, babados delicados, romantismo feminino.",
-        promptKeywords:
-          "feminine youthful sacred dress, pink and red layered ruffled ball skirt, delicate white lace and satin ribbon details, playful romantic silhouette, short puffed sleeves, full petticoat volume, Umbanda sacred spirit fashion",
-        suggestedColors: ["rosa", "vermelho"],
-        clothingGender: "feminino",
-      },
-      {
-        id: "da-estrada",
-        label: "Da Estrada",
-        description:
-          "Guardiã das estradas — vermelho e preto ousado, saias com fenda, poderosa.",
-        promptKeywords:
-          "bold road guardian style, deep red and black full ruffled ball skirt, fitted strapless bodice, dramatic front slit on skirt, bold asymmetric ruffles, powerful strong femme sacred ritual fashion",
-        suggestedColors: ["vermelho", "preto"],
-        clothingGender: "feminino",
-      },
-      {
-        id: "rosa-caveira",
-        label: "Rosa Caveira",
-        description:
-          "Rosas vermelhas com caveiras — estética gótica, morte e renascimento.",
-        promptKeywords:
-          "dark romantic gothic ball gown, red roses and skull motifs embroidered throughout, black base with red floral skull prints, dramatic ruffled layers, Day of Dead meets Umbanda sacred aesthetic, red lace overlay",
-        suggestedColors: ["preto", "vermelho"],
-        clothingGender: "feminino",
-      },
-    ],
+    id: "saia-rodada-babados",
+    label: "Saia Rodada de Babados",
+    description: "Múltiplas camadas de babados do quadril até o chão — volumosa e dramática. Pombagira, Cigana, Giras.",
+    gender: "feminino",
+    promptKeywords:
+      "complete floor-length voluminous ruffled sacred dress, extremely full multi-tiered ruffled ball skirt cascading from waist all the way to floor, structured fitted strapless bodice, multiple ruffled layers each wider than the previous creating enormous volume, skirt touching the ground and filling entire frame below waist, artisanal sacred ritual fashion",
+    suggestedColors: ["vermelho", "preto", "amarelo"],
   },
   {
-    id: "exu",
-    label: "Exú",
-    description:
-      "Guardião dos caminhos. Trajes poderosos — ternos escuros, capas dramáticas, cartola e bengala.",
-    styles: [
-      {
-        id: "tranca-rua",
-        label: "Tranca-Rua",
-        description:
-          "Guardião das ruas — terno preto com listras vermelhas, capa, cartola e bengala.",
-        promptKeywords:
-          "formal black suit with red vertical stripe details on jacket, long dramatic black cape with red lining, top hat, walking cane, crossroads guardian attire, powerful mystical sacred Umbanda fashion, black dress pants",
-        suggestedColors: ["preto", "vermelho"],
-        clothingGender: "masculino",
-      },
-      {
-        id: "marabô",
-        label: "Marabô",
-        description:
-          "O mais elegante dos Exus — casaca preta e dourada, cartola de abas largas.",
-        promptKeywords:
-          "most elegant exu, formal black tailcoat with gold trim along lapels and cuffs, long dramatic black satin cape lined with gold, tall top hat with gold hat band, sophisticated Quimbanda ritual fashion, black-gold luxury sacred attire, formal dress pants with gold stripe",
-        suggestedColors: ["preto", "dourado"],
-        clothingGender: "masculino",
-      },
-      {
-        id: "sete-encruzilhadas",
-        label: "Sete Encruzilhadas",
-        description:
-          "Sete encruzilhadas — capa longa vermelha e preta, poderoso e dramático.",
-        promptKeywords:
-          "dramatic full-length red and black sweeping cape, black formal tunic underneath with red sash belt, seven crossroads symbolism embroidery, powerful mystical sacred Quimbanda outfit, black boots, commanding dramatic silhouette",
-        suggestedColors: ["preto", "vermelho"],
-        clothingGender: "masculino",
-      },
-      {
-        id: "veludo",
-        label: "Veludo",
-        description:
-          "Sofisticado — terno completo de veludo preto com detalhes vermelho sangue.",
-        promptKeywords:
-          "luxurious all-black velvet suit, deep crimson-red velvet accents on lapels collar and cuffs, sophisticated formal sacred ritual attire, rich plush velvet texture throughout, powerful dark aesthetic",
-        suggestedColors: ["preto", "vinho"],
-        clothingGender: "masculino",
-      },
-      {
-        id: "caveira",
-        label: "Caveira",
-        description:
-          "Exu Caveira — preto e branco, caveiras bordadas, misticismo e ancestralidade.",
-        promptKeywords:
-          "skull exu sacred outfit, black formal suit with white skull motifs embroidered throughout, black-white contrast, dramatic skull embroidery on jacket and pants, dark mystical sacred ritual garment, gothic Umbanda aesthetic",
-        suggestedColors: ["preto", "branco"],
-        clothingGender: "masculino",
-      },
-      {
-        id: "exu-rei",
-        label: "Exu Rei",
-        description:
-          "Rei dos Exus — manto real preto e dourado, coroa, cetro, suntuoso.",
-        promptKeywords:
-          "king exu sacred royal attire, elaborate black and gold royal cape-robe, golden crown on head, ornate scepter, black formal suit underneath with gold embroidery, majestic sacred ritual fashion, large dramatic cape spread wide",
-        suggestedColors: ["preto", "dourado"],
-        clothingGender: "masculino",
-      },
-      {
-        id: "morcego",
-        label: "Morcego",
-        description:
-          "Exu Morcego — capa preta em forma de asa de morcego, sombrio e dramático.",
-        promptKeywords:
-          "bat exu, dramatic bat-wing shaped full-length black cape spread wide like wings, all black ritual attire underneath, gothic dark sacred outfit, mysterious dark powerful sacred fashion, bat wing silhouette cape spread open",
-        suggestedColors: ["preto", "grafite"],
-        clothingGender: "masculino",
-      },
-      {
-        id: "do-lodo",
-        label: "Do Lodo",
-        description:
-          "Exu do Lodo — verde escuro e preto, natureza sombria, lama e encruzilhadas.",
-        promptKeywords:
-          "swamp exu sacred attire, dark forest green and black formal outfit, mossy textured fabric, nature spirit aesthetic, dark green suit with black accents and trim, mystical swamp crossroads sacred Umbanda fashion",
-        suggestedColors: ["verde", "preto"],
-        clothingGender: "masculino",
-      },
-    ],
+    id: "vestido-longo-renda",
+    label: "Vestido Longo de Renda",
+    description: "Vestido elegante com renda do decote ao chão — sofisticado e sagrado. Pombagira elegante, Yemanjá.",
+    gender: "feminino",
+    promptKeywords:
+      "complete floor-length elegant lace gown covering entire body from off-shoulder neckline to floor, delicate lace overlay on satin underlayer throughout, fitted bodice, full-length lace skirt reaching the ground, graceful flowing silhouette, elegant sacred ceremonial fashion",
+    suggestedColors: ["branco", "vermelho", "azul"],
+  },
+  {
+    id: "conjunto-cigano",
+    label: "Conjunto Cigano",
+    description: "Blusa ombro a ombro + cinto de moedas + saia colorida de camadas. Cigana, Pombagira Cigana.",
+    gender: "feminino",
+    promptKeywords:
+      "complete floor-length Romani gypsy sacred outfit, wide off-shoulder loose blouse with ruffled sleeves, coin-adorned belt at waist, extremely full colorful multi-tier ruffled maxi skirt in contrasting colors reaching floor, wide layers of ruffles filling entire lower body all the way to ground, bohemian sacred fashion",
+    suggestedColors: ["vermelho", "laranja", "roxo"],
+  },
+  {
+    id: "bata-gira-saia",
+    label: "Bata de Gira com Saia",
+    description: "Blusa solta de gira com saia rodada longa — clássico das giras de Umbanda.",
+    gender: "feminino",
+    promptKeywords:
+      "complete sacred ritual gira outfit, classic loose-fitting ritual blouse with lace trim at collar and sleeves, matching full-length floor-reaching skirt with lace trim around hem, elegant sacred ceremonial wear, complete outfit from shoulders to floor, artisanal Umbanda ritual fashion",
+    suggestedColors: ["branco", "azul", "rosa"],
+  },
+  {
+    id: "vestido-gode-longo",
+    label: "Vestido Godê Longo",
+    description: "Busto justo + saia godê que se abre dramaticamente até o chão. Elegante e fluido.",
+    gender: "feminino",
+    promptKeywords:
+      "complete floor-length elegant godê cut dress, fitted bodice tapering to waist, dramatically flared godê skirt spreading very wide from hips all the way to floor, circular flare silhouette, satin fabric with lace detailing, elegant sacred fashion covering entire body from neckline to floor",
+    suggestedColors: ["vermelho", "roxo", "preto"],
+  },
+  // ── Masculino ─────────────────────────────────────────────────────
+  {
+    id: "terno-capa-sacramental",
+    label: "Terno com Capa Sacramental",
+    description: "Terno formal + capa longa dramática que vai até o chão. Exu, Zé Pilintra, falange da esquerda.",
+    gender: "masculino",
+    promptKeywords:
+      "complete full-body sacred ritual outfit, dramatic floor-length cape falling from shoulders all the way to floor, open wide to reveal formal suit jacket and dress shirt beneath, formal dress trousers and shoes visible below cape hem, cape spreading dramatically at sides, top hat, complete sacred attire from head to floor, powerful commanding silhouette",
+    suggestedColors: ["preto", "vermelho", "dourado"],
+  },
+  {
+    id: "terno-formal-sagrado",
+    label: "Terno Formal Sagrado",
+    description: "Terno completo com gravata — elegante e poderoso. Exu Marabô, Exu Veludo.",
+    gender: "masculino",
+    promptKeywords:
+      "complete formal sacred suit covering entire body, satin-lapel formal suit jacket with white dress shirt and elegant tie, formal dress trousers falling straight to polished leather shoes, complete tailored formal outfit from collar to shoes, elegant ceremonial attire",
+    suggestedColors: ["preto", "dourado", "vinho"],
+  },
+  {
+    id: "capa-dramatica-longa",
+    label: "Capa Dramática Longa",
+    description: "Capa longa até o chão como peça principal — imponente e sagrada. Exu, Ogum, entidades de capa.",
+    gender: "masculino",
+    promptKeywords:
+      "dramatic floor-length sacred cape as main garment, extremely long flowing cape spread open from shoulders all the way to floor, cape billowing wide to reveal simple outfit beneath, floor-sweeping silhouette, ceremonial full-length cape, simple formal pants and shoes visible, sacred ritual cape attire complete",
+    suggestedColors: ["preto", "vermelho", "azul"],
+  },
+  {
+    id: "farda-marinheiro",
+    label: "Farda de Marinheiro",
+    description: "Farda naval completa — branca com detalhes azuis. Marinheiro, entidades do mar.",
+    gender: "masculino",
+    promptKeywords:
+      "complete sailor uniform from collar to shoes, classic navy blue and white sailor dress uniform, white naval shirt with large traditional sailor collar, navy blue wide-leg sailor trousers with white stripe, white sailor cap, complete maritime sacred Marinheiro spirit attire",
+    suggestedColors: ["branco", "azul", "dourado"],
+  },
+  {
+    id: "bata-caboclo",
+    label: "Bata de Caboclo",
+    description: "Túnica rústica com bordados indígenas, franja e couro — Caboclo, Boiadeiro.",
+    gender: "masculino",
+    promptKeywords:
+      "complete indigenous-inspired sacred attire from shoulders to feet, natural earth-tone long tunic with geometric tribal embroidery and fringe leather details, wide leather belt, loose natural-fiber pants, rugged boots, complete Caboclo sacred outfit full body",
+    suggestedColors: ["bege", "verde", "dourado"],
+  },
+  {
+    id: "roupa-boiadeiro",
+    label: "Roupa de Boiadeiro",
+    description: "Chapéu de couro, camisa xadrez, cinto de couro — Boiadeiro, Boi.",
+    gender: "masculino",
+    promptKeywords:
+      "complete cowboy-rustic sacred outfit from hat to boots, wide-brim leather cowboy hat, plaid flannel shirt with large bandana tied at neck, sturdy thick leather belt with large buckle, wide-leg canvas work pants, leather cowboy boots, Boiadeiro sacred spirit attire complete from head to toe",
+    suggestedColors: ["bege", "vermelho", "preto"],
+  },
+  // ── Unissex ───────────────────────────────────────────────────────
+  {
+    id: "manto-bordado-longo",
+    label: "Manto Bordado Longo",
+    description: "Manto comprido com bordados sacros — Preto-Velho, Oxalá, Nanã, entidades de manto.",
+    gender: "unissex",
+    promptKeywords:
+      "complete floor-length embroidered sacred manto robe covering entire body, long flowing formal robe falling from shoulders all the way to floor, intricate symbolic embroidery throughout robe panels, wide flowing sleeves, complete ceremonial vestment, dignified sacred full-body robe",
+    suggestedColors: ["branco", "roxo", "dourado"],
   },
 ];
 

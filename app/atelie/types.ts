@@ -42,26 +42,18 @@ export interface ColorSwatch {
   hex: string;
 }
 
-export interface EntityStyle {
+export interface ClothingStyle {
   id: string;
   label: string;
   description: string;
+  gender: "feminino" | "masculino" | "unissex";
   promptKeywords: string;
   suggestedColors: string[]; // ColorSwatch ids
-  clothingGender: "feminino" | "masculino" | "unissex";
-}
-
-export interface Entity {
-  id: string;
-  label: string;
-  description: string;
-  styles: EntityStyle[];
 }
 
 export interface ProvadorSelection {
-  entityId: string;      // "pombagira" | "exu"
-  styleId: string;       // style within entity
-  primaryColor: string;  // ColorSwatch id
+  styleId: string;
+  primaryColor: string;
   secondaryColor: string;
   accentColor: string;
   fabricId: string;
