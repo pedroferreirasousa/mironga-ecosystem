@@ -1,34 +1,26 @@
-"use client";
+﻿"use client";
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { ChangeEvent } from "react";
 import gsap from "gsap";
 import type { ProvadorSelection } from "../../types";
 import {
-  CLOTHING_TYPES,
+  ENTITIES,
   FABRICS,
-  STYLES,
   COLOR_SWATCHES,
   ATELIE_WHATSAPP,
 } from "../../provador-config";
 
 const TOTAL_STEPS = 5;
-
-const STEP_LABELS = [
-  "Tipo de peça",
-  "Cores",
-  "Tecido & estilo",
-  "Descrição",
-  "Sua foto",
-];
+const STEP_LABELS = ["Entidade", "Estilo", "Cores", "Tecido & Detalhes", "Sua Foto"];
 
 function emptySelection(): ProvadorSelection {
   return {
-    clothingTypeId: "",
+    entityId: "",
+    styleId: "",
     primaryColor: "",
     secondaryColor: "",
     accentColor: "",
     fabricId: "",
-    styleId: "",
     description: "",
     photoFile: null,
     photoPreviewUrl: "",
@@ -42,6 +34,9 @@ export default function Provador() {
   const [loading, setLoading] = useState(false);
   const [resultImage, setResultImage] = useState("");
   const [error, setError] = useState("");
+
+  const selectedEntity = ENTITIES.find((e) => e.id === sel.entityId);
+  const selectedStyle  = selectedEntity?.styles.find((s) => s.id === sel.styleId);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -64,10 +59,10 @@ export default function Provador() {
   }
 
   function canAdvance() {
-    if (step === 1) return !!sel.clothingTypeId;
-    if (step === 2) return !!sel.primaryColor;
-    if (step === 3) return !!sel.fabricId && !!sel.styleId;
-    if (step === 4) return sel.description.trim().length >= 10;
+    if (step === 1) return !!sel.entityId;
+    if (step === 2) return !!sel.styleId;
+    if (step === 3) return !!sel.primaryColor;
+    if (step === 4) return !!sel.fabricId;
     if (step === 5) return !!sel.photoFile;
     return true;
   }
@@ -85,25 +80,25 @@ export default function Provador() {
     setError("");
     setResultImage("");
 
-    const clothingType = CLOTHING_TYPES.find((c) => c.id === sel.clothingTypeId)?.label ?? sel.clothingTypeId;
-    const fabric       = FABRICS.find((f) => f.id === sel.fabricId)?.label ?? sel.fabricId;
-    const style        = STYLES.find((s) => s.id === sel.styleId)?.label ?? sel.styleId;
-    const primaryColor = COLOR_SWATCHES.find((c) => c.id === sel.primaryColor)?.label ?? sel.primaryColor;
-    const secondaryColor = COLOR_SWATCHES.find((c) => c.id === sel.secondaryColor)?.label ?? "";
-    const accentColor  = COLOR_SWATCHES.find((c) => c.id === sel.accentColor)?.label ?? "";
+    const fabric    = FABRICS.find((f) => f.id === sel.fabricId)?.label ?? sel.fabricId;
+    const primary   = COLOR_SWATCHES.find((c) => c.id === sel.primaryColor)?.label ?? sel.primaryColor;
+    const secondary = COLOR_SWATCHES.find((c) => c.id === sel.secondaryColor)?.label ?? "";
+    const accent    = COLOR_SWATCHES.find((c) => c.id === sel.accentColor)?.label ?? "";
 
     const fd = new FormData();
     fd.append("photo", sel.photoFile);
-    fd.append("clothingType", clothingType);
-    fd.append("fabric", fabric);
-    fd.append("style", style);
-    fd.append("primaryColor", primaryColor);
-    fd.append("secondaryColor", secondaryColor);
-    fd.append("accentColor", accentColor);
-    fd.append("description", sel.description);
+    fd.append("entityId",       sel.entityId);
+    fd.append("entityLabel",    selectedEntity?.label ?? "");
+    fd.append("styleLabel",     selectedStyle?.label  ?? "");
+    fd.append("styleKeywords",  selectedStyle?.promptKeywords ?? "");
+    fd.append("fabric",         fabric);
+    fd.append("primaryColor",   primary);
+    fd.append("secondaryColor", secondary);
+    fd.append("accentColor",    accent);
+    fd.append("description",    sel.description);
 
     try {
-      const res = await fetch("/api/provador/generate", { method: "POST", body: fd });
+      const res  = await fetch("/api/provador/generate", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro desconhecido.");
       setResultImage(data.image);
@@ -116,15 +111,13 @@ export default function Provador() {
   }
 
   function handleSendWpp() {
-    const clothingType = CLOTHING_TYPES.find((c) => c.id === sel.clothingTypeId)?.label;
-    const fabric       = FABRICS.find((f) => f.id === sel.fabricId)?.label;
-    const style        = STYLES.find((s) => s.id === sel.styleId)?.label;
-    const primary      = COLOR_SWATCHES.find((c) => c.id === sel.primaryColor)?.label;
-
+    const fabric  = FABRICS.find((f) => f.id === sel.fabricId)?.label;
+    const primary = COLOR_SWATCHES.find((c) => c.id === sel.primaryColor)?.label;
     const msg = encodeURIComponent(
       `Olá! Gerei uma visualização de roupa pelo Provador Inteligente do Ateliê Luz das Almas.\n\n` +
-      `*Tipo:* ${clothingType}\n*Tecido:* ${fabric}\n*Estilo:* ${style}\n*Cor principal:* ${primary}\n` +
-      `*Descrição:* ${sel.description}\n\n` +
+      `*Entidade:* ${selectedEntity?.label}\n*Estilo:* ${selectedStyle?.label}\n` +
+      `*Tecido:* ${fabric}\n*Cor principal:* ${primary}\n` +
+      (sel.description ? `*Detalhes extras:* ${sel.description}\n\n` : "\n") +
       `Gostei do resultado e gostaria de negociar a confecção! 💛`
     );
     window.open(`https://wa.me/${ATELIE_WHATSAPP}?text=${msg}`, "_blank", "noopener");
@@ -144,12 +137,13 @@ export default function Provador() {
       <div className="section-header animate-in">
         <h2 className="section-title">Provador inteligente</h2>
         <p className="section-sub">
-          Descreva como quer sua peça, envie sua foto e veja como ficaria em você — antes de encomendar.
+          Escolha a entidade, o estilo e as cores — a IA veste a roupa em você. Sem trocar seu rosto.
         </p>
       </div>
 
       <div className="provador-wizard animate-in">
-        {/* Progress */}
+
+        {/* ── Progress bar ── */}
         {step <= TOTAL_STEPS && (
           <div className="wizard-progress">
             <div className="wizard-progress-bar">
@@ -170,37 +164,64 @@ export default function Provador() {
         )}
 
         <div className="provador-step-body">
-          {/* ── STEP 1: Tipo de peça ── */}
+
+          {/* ── STEP 1: Entidade ── */}
           {step === 1 && (
             <div className="wizard-section">
-              <h3 className="wizard-section-title">Que tipo de peça você quer?</h3>
-              <div className="clothing-type-grid">
-                {CLOTHING_TYPES.map((type) => (
+              <h3 className="wizard-section-title">Para qual entidade é a roupa?</h3>
+              <div className="entity-grid">
+                {ENTITIES.map((entity) => (
                   <button
-                    key={type.id}
-                    className={`clothing-type-card${sel.clothingTypeId === type.id ? " selected" : ""}`}
-                    onClick={() => setSel((s) => ({ ...s, clothingTypeId: type.id }))}
+                    key={entity.id}
+                    className={`entity-card entity-card--${entity.id}${sel.entityId === entity.id ? " selected" : ""}`}
+                    onClick={() => setSel((s) => ({ ...s, entityId: entity.id, styleId: "" }))}
                   >
-                    <span className="clothing-type-label">{type.label}</span>
+                    <span className="entity-card__name">{entity.label}</span>
+                    <span className="entity-card__desc">{entity.description}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ── STEP 2: Cores ── */}
-          {step === 2 && (
+          {/* ── STEP 2: Estilo ── */}
+          {step === 2 && selectedEntity && (
+            <div className="wizard-section">
+              <h3 className="wizard-section-title">Qual estilo de {selectedEntity.label}?</h3>
+              <div className="style-grid">
+                {selectedEntity.styles.map((style) => (
+                  <button
+                    key={style.id}
+                    className={`style-card${sel.styleId === style.id ? " selected" : ""}`}
+                    onClick={() => setSel((s) => ({ ...s, styleId: style.id }))}
+                  >
+                    <span className="style-card__name">{style.label}</span>
+                    <span className="style-card__desc">{style.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 3: Cores ── */}
+          {step === 3 && (
             <div className="wizard-section">
               <h3 className="wizard-section-title">Escolha as cores</h3>
+              {selectedStyle && (
+                <p className="wizard-hint">
+                  Sugestão para <strong>{selectedStyle.label}</strong>:{" "}
+                  {selectedStyle.suggestedColors
+                    .map((id) => COLOR_SWATCHES.find((c) => c.id === id)?.label)
+                    .join(" e ")}
+                </p>
+              )}
 
               <div className="color-group">
                 <label className="color-group-label">Cor principal <span className="required">*</span></label>
                 <div className="color-swatches">
                   {COLOR_SWATCHES.filter((c) => c.id !== "none").map((c) => (
                     <button
-                      key={c.id}
-                      title={c.label}
-                      aria-label={c.label}
+                      key={c.id} title={c.label} aria-label={c.label}
                       className={`color-swatch${sel.primaryColor === c.id ? " selected" : ""}`}
                       style={{ background: c.hex }}
                       onClick={() => setSel((s) => ({ ...s, primaryColor: c.id }))}
@@ -214,9 +235,7 @@ export default function Provador() {
                 <div className="color-swatches">
                   {COLOR_SWATCHES.map((c) => (
                     <button
-                      key={c.id}
-                      title={c.label}
-                      aria-label={c.label}
+                      key={c.id} title={c.label} aria-label={c.label}
                       className={`color-swatch${c.id === "none" ? " swatch-none" : ""}${sel.secondaryColor === c.id ? " selected" : ""}`}
                       style={{ background: c.id === "none" ? undefined : c.hex }}
                       onClick={() => setSel((s) => ({ ...s, secondaryColor: c.id === "none" ? "" : c.id }))}
@@ -226,13 +245,11 @@ export default function Provador() {
               </div>
 
               <div className="color-group">
-                <label className="color-group-label">Cor de detalhe / bordado <span className="optional">(opcional)</span></label>
+                <label className="color-group-label">Detalhes / bordado <span className="optional">(opcional)</span></label>
                 <div className="color-swatches">
                   {COLOR_SWATCHES.map((c) => (
                     <button
-                      key={c.id}
-                      title={c.label}
-                      aria-label={c.label}
+                      key={c.id} title={c.label} aria-label={c.label}
                       className={`color-swatch${c.id === "none" ? " swatch-none" : ""}${sel.accentColor === c.id ? " selected" : ""}`}
                       style={{ background: c.id === "none" ? undefined : c.hex }}
                       onClick={() => setSel((s) => ({ ...s, accentColor: c.id === "none" ? "" : c.id }))}
@@ -243,13 +260,13 @@ export default function Provador() {
             </div>
           )}
 
-          {/* ── STEP 3: Tecido & Estilo ── */}
-          {step === 3 && (
+          {/* ── STEP 4: Tecido + descrição ── */}
+          {step === 4 && (
             <div className="wizard-section">
-              <h3 className="wizard-section-title">Tecido e estilo</h3>
+              <h3 className="wizard-section-title">Tecido e detalhes extras</h3>
 
               <div className="option-group">
-                <label className="color-group-label">Tecido <span className="required">*</span></label>
+                <label className="color-group-label">Tecido principal <span className="required">*</span></label>
                 <div className="option-chips">
                   {FABRICS.map((f) => (
                     <button
@@ -264,39 +281,16 @@ export default function Provador() {
               </div>
 
               <div className="option-group">
-                <label className="color-group-label">Estilo <span className="required">*</span></label>
-                <div className="option-chips">
-                  {STYLES.map((st) => (
-                    <button
-                      key={st.id}
-                      className={`option-chip${sel.styleId === st.id ? " selected" : ""}`}
-                      onClick={() => setSel((s) => ({ ...s, styleId: st.id }))}
-                    >
-                      {st.label}
-                    </button>
-                  ))}
-                </div>
+                <label className="color-group-label">Algo extra <span className="optional">(opcional)</span></label>
+                <p className="wizard-hint">Ex: "saia com cauda longa", "bordado de rosas na barra", "manga sino"...</p>
+                <textarea
+                  className="filter-input provador-textarea"
+                  rows={4}
+                  placeholder="Descreva um detalhe especial que deseja na peça..."
+                  value={sel.description}
+                  onChange={(e) => setSel((s) => ({ ...s, description: e.target.value }))}
+                />
               </div>
-            </div>
-          )}
-
-          {/* ── STEP 4: Descrição ── */}
-          {step === 4 && (
-            <div className="wizard-section">
-              <h3 className="wizard-section-title">Descreva sua peça</h3>
-              <p className="wizard-hint">
-                Quanto mais detalhe, melhor o resultado. Mencione comprimento, decote, bordados, estampas, referências espirituais, etc.
-              </p>
-              <textarea
-                className="filter-input provador-textarea"
-                rows={6}
-                placeholder="Ex: Quero uma saia longa com bordados dourados na barra, inspirada nos orixás, com fenda lateral e recortes em renda..."
-                value={sel.description}
-                onChange={(e) => setSel((s) => ({ ...s, description: e.target.value }))}
-              />
-              <span className={`char-count${sel.description.length < 10 ? " warn" : ""}`}>
-                {sel.description.length} caracteres {sel.description.length < 10 ? "(mínimo 10)" : "✓"}
-              </span>
             </div>
           )}
 
@@ -305,7 +299,7 @@ export default function Provador() {
             <div className="wizard-section">
               <h3 className="wizard-section-title">Envie sua foto</h3>
               <p className="wizard-hint">
-                Use uma foto em pé, com o corpo inteiro visível, em fundo claro. Quanto melhor a foto, melhor o resultado da IA.
+                Use uma foto em pé, corpo inteiro visível, fundo claro e boa iluminação. Quanto melhor a foto, melhor o resultado da IA.
               </p>
               <label className="photo-upload-label">
                 <input
@@ -329,21 +323,21 @@ export default function Provador() {
                 )}
               </label>
               <p className="privacy-note">
-                🔒 Sua foto é processada apenas para gerar a visualização e não é armazenada em nossos servidores.
+                🔒 Sua foto é usada apenas para gerar a visualização e não é armazenada.
               </p>
             </div>
           )}
 
-          {/* ── GENERATING ── */}
+          {/* ── Gerando ── */}
           {loading && (
             <div className="provador-generating">
               <div className="generating-spinner" />
-              <p>A IA está criando sua peça...</p>
-              <small>Pode levar até 30 segundos</small>
+              <p>A IA está criando sua roupa sagrada...</p>
+              <small>Pode levar até 40 segundos</small>
             </div>
           )}
 
-          {/* ── ERROR ── */}
+          {/* ── Erro ── */}
           {error && (
             <div className="provador-error">
               <p>⚠️ {error}</p>
@@ -356,67 +350,55 @@ export default function Provador() {
           {/* ── STEP 6: Resultado ── */}
           {step === 6 && resultImage && (
             <div className="wizard-section">
-              <h3 className="wizard-section-title">Sua visualização está pronta! ✨</h3>
+              <h3 className="wizard-section-title">Sua roupa está pronta! ✨</h3>
               <p className="wizard-hint">
-                Este é um preview gerado por IA. A peça real será confeccionada com materiais do ateliê. Se gostar, envie para o WhatsApp para negociarmos!
+                Preview gerado por IA. A peça real será confeccionada pelo ateliê com os materiais escolhidos.
               </p>
               <div className="result-grid">
                 <div className="result-col">
-                  <span className="result-label">Sua foto original</span>
+                  <span className="result-label">Foto original</span>
                   <img src={sel.photoPreviewUrl} alt="Foto original" className="result-image" />
                 </div>
                 <div className="result-col">
-                  <span className="result-label">Com a peça idealizada</span>
-                  <img src={resultImage} alt="Geração IA" className="result-image" />
+                  <span className="result-label">{selectedEntity?.label} — {selectedStyle?.label}</span>
+                  <img src={resultImage} alt="Visualização gerada por IA" className="result-image" />
                 </div>
               </div>
               <div className="result-actions">
                 <button className="btn-wpp" onClick={handleSendWpp}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.031-.967-.272-.099-.47-.148-.668.15-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.099-.198.05-.372-.025-.52-.075-.149-.668-1.611-.916-2.206-.242-.579-.487-.5-.668-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.793.372-.272.298-1.04 1.016-1.04 2.479 0 1.463 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.288.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.124 1.528 5.852L.057 23.571a.5.5 0 0 0 .614.614l5.719-1.471A11.946 11.946 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.956 9.956 0 0 1-5.127-1.414l-.366-.22-3.795.977.997-3.794-.24-.38A9.956 9.956 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.031-.967-.272-.099-.47-.148-.668.15-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.099-.198.05-.372-.025-.52-.075-.149-.668-1.611-.916-2.206-.242-.579-.487-.5-.668-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.793.372-.272.298-1.04 1.016-1.04 2.479 0 1.463 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.288.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.124 1.528 5.852L.057 23.571a.5.5 0 0 0 .614.614l5.719-1.471A11.946 11.946 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.956 9.956 0 0 1-5.127-1.414l-.366-.22-3.795.977.997-3.794-.24-.38A9.956 9.956 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
                   </svg>
                   Enviar para o Ateliê via WhatsApp
                 </button>
-                <button className="option-chip" onClick={reset}>
-                  Criar outra visualização
-                </button>
+                <button className="option-chip" onClick={reset}>Criar outra visualização</button>
               </div>
             </div>
           )}
+
         </div>
 
-        {/* ── Navigation buttons ── */}
+        {/* ── Navegação ── */}
         {step <= TOTAL_STEPS && !loading && (
           <div className="wizard-nav">
             {step > 1 && (
-              <button className="option-chip" onClick={() => animateStep(step - 1)}>
-                ← Voltar
-              </button>
+              <button className="option-chip" onClick={() => animateStep(step - 1)}>← Voltar</button>
             )}
             {step < TOTAL_STEPS && (
-              <button
-                className="btn-wpp"
-                disabled={!canAdvance()}
-                onClick={() => animateStep(step + 1)}
-              >
+              <button className="btn-wpp" disabled={!canAdvance()} onClick={() => animateStep(step + 1)}>
                 Próximo →
               </button>
             )}
             {step === TOTAL_STEPS && (
-              <button
-                className="btn-wpp"
-                disabled={!canAdvance() || loading}
-                onClick={handleGenerate}
-              >
+              <button className="btn-wpp" disabled={!canAdvance() || loading} onClick={handleGenerate}>
                 Gerar visualização ✨
               </button>
             )}
           </div>
         )}
+
       </div>
     </section>
   );
 }
-
-

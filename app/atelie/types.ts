@@ -42,13 +42,29 @@ export interface ColorSwatch {
   hex: string;
 }
 
+export interface EntityStyle {
+  id: string;
+  label: string;
+  description: string;
+  promptKeywords: string;
+  suggestedColors: string[]; // ColorSwatch ids
+  clothingGender: "feminino" | "masculino" | "unissex";
+}
+
+export interface Entity {
+  id: string;
+  label: string;
+  description: string;
+  styles: EntityStyle[];
+}
+
 export interface ProvadorSelection {
-  clothingTypeId: string;
-  primaryColor: string;   // ColorSwatch id
-  secondaryColor: string; // ColorSwatch id or ""
-  accentColor: string;    // ColorSwatch id or ""
+  entityId: string;      // "pombagira" | "exu"
+  styleId: string;       // style within entity
+  primaryColor: string;  // ColorSwatch id
+  secondaryColor: string;
+  accentColor: string;
   fabricId: string;
-  styleId: string;
   description: string;
   photoFile: File | null;
   photoPreviewUrl: string;
