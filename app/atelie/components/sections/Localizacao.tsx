@@ -22,6 +22,30 @@ export default function Localizacao() {
         <p className="section-sub">Venha nos visitar e sentir a energia do espaço.</p>
       </div>
 
+      <div className="entrega-brasil animate-in">
+        <div className="entrega-item">
+          <span className="entrega-icon">🇧🇷</span>
+          <div>
+            <strong>Entregamos para todo o Brasil</strong>
+            <p>Enviamos por PAC, SEDEX e transportadoras parceiras. Prazo e frete calculados no momento do pedido via WhatsApp.</p>
+          </div>
+        </div>
+        <div className="entrega-item">
+          <span className="entrega-icon">📦</span>
+          <div>
+            <strong>Embalagem especial</strong>
+            <p>Cada peça é embalada com cuidado, protegida e identificada com a energia do ateliê.</p>
+          </div>
+        </div>
+        <div className="entrega-item">
+          <span className="entrega-icon">✂️</span>
+          <div>
+            <strong>Peças sob encomenda</strong>
+            <p>Confeccionamos em até 15 dias úteis. Você acompanha o andamento direto pelo nosso WhatsApp.</p>
+          </div>
+        </div>
+      </div>
+
       <div className="localizacao-grid animate-in">
         <div className="localizacao-info">
           <div className="info-item">
