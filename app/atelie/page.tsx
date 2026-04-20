@@ -8,7 +8,6 @@ import QuemSomos from "./components/sections/QuemSomos";
 import Provador from "./components/sections/Provador";
 import Localizacao from "./components/sections/Localizacao";
 import Contato from "./components/sections/Contato";
-import { IconLock } from "./components/Icons";
 import { useAtelieStore } from "./store";
 
 type Section = "pecas" | "provador" | "quemsomos" | "localizacao" | "contato";
@@ -98,9 +97,6 @@ export default function AteliePage() {
             <span className="site-title">Luz das Almas</span>
             <span className="site-sub">Ateliê exclusivo</span>
           </div>
-          <Link href="/atelie/admin" className="header-admin-link">
-            <IconLock size={13} /> Admin
-          </Link>
         </header>
 
         <div className="atelie-content" ref={contentRef}>

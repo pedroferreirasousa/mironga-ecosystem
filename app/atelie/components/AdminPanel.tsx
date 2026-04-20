@@ -1,11 +1,11 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import gsap from "gsap";
 import { useAtelieStore } from "../store";
 import type { ClothingItem } from "../types";
+import { checkAdminPassword } from "../admin/actions";
 
 const SIZES = ["PP", "P", "M", "G", "GG", "XGG"];
-const ADMIN_PASSWORD = "mironga2026"; // troque para senha forte em produção
 
 function emptyForm() {
   return { name: "", description: "", price: "", sizes: [] as string[], whatsappNumber: "", photos: "" };
@@ -15,6 +15,7 @@ export default function AdminPanel() {
   const [auth, setAuth] = useState(false);
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState(emptyForm());
   const [editing, setEditing] = useState<ClothingItem | null>(null);
   const [feedback, setFeedback] = useState("");
@@ -32,8 +33,11 @@ export default function AdminPanel() {
 
   function login(e: React.FormEvent) {
     e.preventDefault();
-    if (pw === ADMIN_PASSWORD) { setAuth(true); setPwError(false); }
-    else setPwError(true);
+    startTransition(async () => {
+      const ok = await checkAdminPassword(pw);
+      if (ok) { setAuth(true); setPwError(false); }
+      else setPwError(true);
+    });
   }
 
   function toggleSize(s: string) {
@@ -93,7 +97,9 @@ export default function AdminPanel() {
             autoComplete="current-password"
           />
           {pwError && <p className="admin-error">Senha incorreta.</p>}
-          <button type="submit" className="btn-wpp">Entrar</button>
+          <button type="submit" className="btn-wpp" disabled={isPending}>
+            {isPending ? "Verificando..." : "Entrar"}
+          </button>
         </form>
       </div>
     );
